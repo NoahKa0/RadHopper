@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="RadHopper.RabbitMQ/RadHopper.RabbitMQ.csproj" />
+  <Project Path="RadHopper/RadHopper.csproj" />
+</Solution>

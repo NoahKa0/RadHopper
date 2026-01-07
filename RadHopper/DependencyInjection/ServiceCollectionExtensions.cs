@@ -1,13 +1,16 @@
 using Microsoft.Extensions.DependencyInjection;
+using RadHopper.Abstractions;
+using RadHopper.Consumers.BehaviorFactory;
 using RadHopper.Transport;
 
 namespace RadHopper.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddRadHopper(this IServiceCollection collection, Func<TransportConfig, ITransportLayer> configure)
+    public static IServiceCollection AddRadHopper(this IServiceCollection collection, Func<ITransportConfigurator, ITransportLayer> configure)
     {
-        var config = new TransportConfig(new Consumers.BehaviorFactory.BehaviorFactory());
+        var config = new TransportConfigurator(new BehaviorFactory());
+
         var transport = configure(config);
         
         RadHopperHostedService.AddTransport(transport);

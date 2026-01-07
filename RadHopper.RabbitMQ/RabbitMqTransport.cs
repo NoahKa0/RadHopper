@@ -1,6 +1,6 @@
 using RabbitMQ.Client;
-using RadHopper.Attributes;
-using RadHopper.Consumers;
+using RadHopper.Abstractions;
+using RadHopper.RabbitMQ.Configuration;
 using RadHopper.Transport;
 using RadHopper.Transport.Exceptions;
 
@@ -8,39 +8,24 @@ namespace RadHopper.RabbitMQ;
 
 public class RabbitMqTransport : ITransportLayer
 {
-    
-    private readonly TransportConfig _config;
+    private readonly ITransportConfigurator _config;
     private readonly ConnectionFactory _factory;
     private IConnection? _connection;
-    
-    private readonly List<IConsumerDescriptor> _consumers;
-    private readonly List<Action<IServiceProvider>> _actions;
 
-    public RabbitMqTransport(TransportConfig config, ConnectionFactory factory)
+    private readonly List<IConsumerDescriptor> _consumers = [];
+    private readonly List<Func<IServiceProvider, IConsumerDescriptor>> _consumerDescriptorFactories = [];
+
+    internal RabbitMqTransport(RabbitMqTransportConfigurator configurator)
+    {
+        _config = configurator.Configurator;
+        _factory = configurator.CreateConnectionFaactory();
+        _consumerDescriptorFactories.AddRange(configurator.ConsumerDescriptorFactories);
+    }
+
+    public RabbitMqTransport(ITransportConfigurator config, ConnectionFactory factory)
     {
         _config = config;
         _factory = factory;
-        _connection = null;
-        _consumers = new List<IConsumerDescriptor>();
-        _actions = new List<Action<IServiceProvider>>();
-    }
-
-    public void AddReceiveEndpoint<C, TM>(string? queueName = null) where TM : class
-        where C : IConsumerRoot<TM>
-    {
-        string queue;
-        if (queueName == null)
-            queue = OnQueueAttribute.GetQueueName(typeof(TM));
-        else
-            queue = queueName;
-        
-        _actions.Add((sp) =>
-        {
-            var behavior = _config.BehaviorFactory.Create<C, TM>(sp, _config);
-            var consumer = new ConsumerDescriptor<TM>(queue, behavior);
-            
-            _consumers.Add(consumer);
-        });
     }
 
     async Task ITransportLayer.SetupConnection(IServiceProvider sp)
@@ -49,9 +34,14 @@ public class RabbitMqTransport : ITransportLayer
             throw new ConnectorException("Already initialized");
         _connection = await _factory.CreateConnectionAsync();
         
-        foreach (var action in _actions)
-            action(sp);
-        _actions.Clear();
+        foreach (var action in _consumerDescriptorFactories)
+        {
+            var descriptor = action(sp);
+
+            _consumers.Add(descriptor);
+        }
+
+        _consumerDescriptorFactories.Clear();
 
         foreach (var consumer in _consumers)
         {

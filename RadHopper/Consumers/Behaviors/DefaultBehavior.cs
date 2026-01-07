@@ -1,8 +1,8 @@
-using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using RadHopper.Abstractions;
 using RadHopper.DependencyInjection;
-using RadHopper.Transport;
+using System.Collections.Concurrent;
 
 namespace RadHopper.Consumers.Behaviors;
 
@@ -19,7 +19,7 @@ public class DefaultBehavior<TM> : IConsumerBehavior<TM>
     private readonly ConcurrentQueue<Task<(HopMessage<TM>, bool)>> _tasks;
     private Task _flushTask;
 
-    public DefaultBehavior(IServiceProvider serviceProvider, Type consumerType, TransportConfig config)
+    public DefaultBehavior(IServiceProvider serviceProvider, Type consumerType, ITransportConfigurator config)
     {
         _consumerType = consumerType;
         _serviceProvider = serviceProvider;

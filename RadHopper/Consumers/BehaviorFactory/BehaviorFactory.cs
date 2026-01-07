@@ -1,11 +1,11 @@
+using RadHopper.Abstractions;
 using RadHopper.Consumers.Behaviors;
-using RadHopper.Transport;
 
 namespace RadHopper.Consumers.BehaviorFactory;
 
 internal class BehaviorFactory : IBehaviorFactory
 {
-    IConsumerBehavior<TM> IBehaviorFactory.Create<C, TM>(IServiceProvider serviceProvider, TransportConfig config)
+    IConsumerBehavior<TM> IBehaviorFactory.Create<C, TM>(IServiceProvider serviceProvider, ITransportConfigurator config)
     {
         var consumerType = typeof(C);
         

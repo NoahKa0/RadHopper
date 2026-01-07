@@ -1,19 +1,18 @@
-using System.Text;
-using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RadHopper.Abstractions;
 using RadHopper.Consumers;
-using RadHopper.DependencyInjection;
-using RadHopper.Transport;
 using RadHopper.Transport.Exceptions;
+using System.Text;
+using System.Text.Json;
 
 namespace RadHopper.RabbitMQ;
 
 internal interface IConsumerDescriptor
 {
-    Task SetupConnection(IConnection connection, IServiceProvider serviceProvider, TransportConfig config);
+    Task SetupConnection(IConnection connection, IServiceProvider serviceProvider, ITransportConfigurator config);
 }
 
 internal class ConsumerDescriptor<TM> : IConsumerDescriptor
@@ -34,7 +33,7 @@ where TM : class
         _channel = null;
     }
 
-    public async Task SetupConnection(IConnection connection, IServiceProvider serviceProvider, TransportConfig config)
+    public async Task SetupConnection(IConnection connection, IServiceProvider serviceProvider, ITransportConfigurator config)
     {
         if (_channel != null)
             return;

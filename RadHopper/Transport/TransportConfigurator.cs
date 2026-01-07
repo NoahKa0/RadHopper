@@ -1,11 +1,13 @@
+using RadHopper.Abstractions;
 using RadHopper.Attributes;
 using RadHopper.Consumers.BehaviorFactory;
 
 namespace RadHopper.Transport;
 
-public class TransportConfig
+public sealed class TransportConfigurator : ITransportConfigurator
 {
-    internal TransportConfig(IBehaviorFactory behaviorFactory)
+    private readonly IBehaviorFactory BehaviorFactory;
+    internal TransportConfigurator(IBehaviorFactory behaviorFactory)
     {
         BehaviorFactory = behaviorFactory;
     }
@@ -15,7 +17,7 @@ public class TransportConfig
     public bool RequeueOnError { get; set; } = true;
     public bool NeverDiscard { get; set; } = false;
 
-    internal int GetBatchSize(Type consumerType)
+    public int GetBatchSize(Type consumerType)
     {
         var config = consumerType
             .GetCustomAttributes(typeof(ConsumerConfigurationAttribute), true)
@@ -26,7 +28,7 @@ public class TransportConfig
         return result > 0 ? result : 1;
     }
     
-    internal int GetWaitTimeMs(Type consumerType)
+    public int GetWaitTimeMs(Type consumerType)
     {
         var config = consumerType
             .GetCustomAttributes(typeof(ConsumerConfigurationAttribute), true)
@@ -37,5 +39,5 @@ public class TransportConfig
         return result > 0 ? result : 1000;
     }
     
-    internal IBehaviorFactory BehaviorFactory { get; private set; }
+    IBehaviorFactory ITransportConfigurator.BehaviorFactory => BehaviorFactory;
 }

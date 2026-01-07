@@ -1,8 +1,8 @@
-using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using RadHopper.Abstractions;
 using RadHopper.DependencyInjection;
-using RadHopper.Transport;
+using System.Collections.Concurrent;
 
 namespace RadHopper.Consumers.Behaviors;
 
@@ -21,7 +21,7 @@ public class BatchBehavior<TM> : IConsumerBehavior<TM>
     private Task _flushTask;
     private Task _timedTask;
 
-    public BatchBehavior(IServiceProvider serviceProvider, Type consumerType, TransportConfig config)
+    public BatchBehavior(IServiceProvider serviceProvider, Type consumerType, ITransportConfigurator config)
     {
         _consumerType = consumerType;
         _serviceProvider = serviceProvider;
