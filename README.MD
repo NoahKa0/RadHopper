@@ -121,5 +121,4 @@ await publisher.Publish("optional-queue-name", message);
 # ⚠️ **MVP / Early Preview**
 > RadHopper is currently in **MVP (Minimum Viable Product)** stage.
 > 
-> The public API may change, features may be added or adjusted, and not all edge cases are fully handled yet.  
-> Feedback and experimentation are encouraged, but it is not recommended for critical production workloads at this stage.
+> Feedback and experimentation are encouraged.
